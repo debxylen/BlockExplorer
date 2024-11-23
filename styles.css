@@ -1,0 +1,139 @@
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  padding: 20px;
+}
+
+h1, h2, h3 {
+  color: #ffffff;
+}
+
+.search input {
+  padding: 10px;
+  border: none;
+  background-color: #333;
+  color: #fff;
+  border-radius: 5px;
+}
+
+.search button {
+  padding: 10px;
+  border: none;
+  background-color: #444;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#latest-blocks, #latest-transactions {
+  margin-top: 20px;
+}
+
+pre {
+  background-color: #1e1e1e;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.raw-json {
+  background-color: #333;
+  border-radius: 5px;
+  padding: 10px;
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+.transaction {
+  background-color: #333;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.tx-block-container {
+  background-color: #1e1e1e;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.block {
+  background-color: #1e1e1e;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.transactions-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+a {  text-decoration: none;  color: #007bff;}
+
+.dark-button {
+    background-color: #1e1e1e;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: 2px solid #444;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+
+.dark-button:hover {
+    background-color: #444;
+    transform: scale(1.05);
+  }
+
+.dark-button:active {
+    background-color: #000;
+    transform: scale(0.95);
+  }
+
+/* Main container that holds the content */
+.scroll-container {
+  position: relative;
+  height: 200px;  /* Fixed height for scroll functionality */
+  width: 300px;   /* Fixed width for scroll functionality */
+  overflow: hidden; /* Hide the scrollbar completely */
+}
+
+/* Hide scrollbar for the entire page */
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Hides the scrollbar */
+  height: 100vh; /* Ensure the page fills the viewport */
+}
+
+/* Create a wrapper to enable scrolling but hide scrollbar */
+.page-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Enables scrolling without showing scrollbar */
+  padding-right: 20px; /* Adjusts for potential invisible scrollbar space */
+}
+
+/* Hide the scrollbar for WebKit browsers (Chrome, Safari) */
+.page-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.page-wrapper {
+  scrollbar-width: none;
+}
+

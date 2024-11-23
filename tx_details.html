@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction Details</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+</head>
+<body>
+<div class="page-wrapper" id="page-wrapper">
+  <div class="container">
+    <h1>Transaction Details</h1>
+    <div id="transaction-details">
+      <!-- Transaction details will be displayed here -->
+    </div>
+    <pre><code class="json" id="raw-json"></code></pre>
+  </div>
+  <center id="receipt-btn"><button class="dark-button" onclick="fetchAndDisplayTransactionReceipt(document.getElementById('tx-block-number'), document.getElementById('transaction-receipt'))">Fetch Receipt</button></center>
+  <div id="transaction-receipt" class = "block">
+    <!-- Transaction receipt will be displayed here -->
+  </div>
+</div>
+  <script src="script.js"></script>
+</body>
+</html>
