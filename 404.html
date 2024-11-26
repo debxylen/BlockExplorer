@@ -6,20 +6,24 @@
   <title>Redirecting...</title>
 </head>
 <body>
-  <script>
-    // Get the current URL path
-    const path = window.location.pathname;
+<script>
+  // Get the current URL path
+  const path = window.location.pathname;
 
-    // Check if the path matches `/tx/{hash}`
-    const match = path.match(/^\/tx\/([^/]+)$/);
-    if (match) {
-      // Extract the hash and redirect to `/tx?id={hash}`
-      const hash = match[1];
-      window.location.href = `/tx?id=${hash}`;
-    } else {
-      // If no match, show a 404 message or redirect to home
-      document.body.innerHTML = '<h1>404 - Page Not Found</h1>';
-    }
-  </script>
+  // Adjust the base path to match your GitHub Pages repository name
+  const basePath = '/BlockExplorer';
+
+  // Check if the path matches `/BlockExplorer/tx/{hash}`
+  const match = path.match(new RegExp(`^${basePath}/tx/([^/]+)$`));
+  if (match) {
+    // Extract the hash and redirect to `/tx?id={hash}`
+    const hash = match[1];
+    window.location.href = `${basePath}/tx?id=${hash}`;
+  } else {
+    // If no match, show a 404 message or redirect to home
+    document.body.innerHTML = '<h1>404 - Page Not Found</h1>';
+  }
+</script>
+
 </body>
 </html>
