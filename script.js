@@ -23,7 +23,6 @@ async function sendRPCRequest(method, params) {
   });
 
   const data = await response.json();
-  console.log(data);
   return data.result; // Extract result from the response
 }
 
@@ -179,77 +178,48 @@ if (document.getElementById('latest-transactions')) {
   fetchLatestTransactions();
 }
 
-// Fetch and display transaction details
-async function fetchTransactionDetails() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const txHash = urlParams.get('tx'); // Get transaction hash from URL
-
-  if (txHash) {
+// Fetch transaction details by hash and redirect
+async function fetchTransactionByHash(txHash) {
     try {
-      var transactionData = await sendRPCRequest('eth_getTransactionByHash', [txHash]);
+        // Send RPC request to get transaction details
+        const transactionData = await sendRPCRequest('eth_getTransactionByHash', [txHash]);
 
-      if (transactionData) {
-        const transactionDetailsContainer = document.getElementById('transaction-details');
-        const txBlock = await sendRPCRequest('eth_getBlockByNumber', [transactionData.blockNumber.toString(16)]);
-        console.log(txBlock);
-        const blockHash = txBlock.hash;
-        transactionDetailsContainer.innerHTML = `
-          <p>Transaction Hash: <a href="transaction_details.html?tx=${transactionData.hash}">${transactionData.hash}</a></p>
-          <p>From: ${transactionData.sender}</p>
-          <p>To: ${transactionData.recipient}</p>
-          <p>Value: ${parseInt(transactionData.amount, 16)} XYL</p>
-          <p>Block Hash: <a href="block_details.html?block=${blockHash}">${blockHash}</a></p>
-          <p id="tx-block-number">Block Number: ${transactionData.blockNumber}</p>
-          <p>Nonce: ${txBlock.nonce}</p>
-          <p>Timestamp: ${txBlock.timestamp}</p>
-        `;
-
-        // Show raw transaction data in JSON format
-        const rawJsonContainer = document.getElementById("raw-json");
-        rawJsonContainer.textContent = JSON.stringify(transactionData, null, 2);
-        
-        // Optional: Highlight raw JSON using highlight.js if required
-        hljs.highlightAll();
-      } else {
-        document.getElementById('transaction-details').innerHTML = '<p>Transaction not found.</p>';
-      }
+        if (transactionData) {
+            // Redirect to the transaction's block number page
+            const blockNumber = transactionData.blockNumber; // Convert hex to decimal
+            window.location.href = `tx.html?id=${blockNumber}`;
+        } else {
+            console.error('Transaction not found.');
+            alert('Transaction not found.');
+        }
     } catch (error) {
-      console.error('Error fetching transaction data:', error);
-      document.getElementById('transaction-details').innerHTML = '<p>Error fetching transaction data.</p>';
+        console.error('Error fetching transaction:', error);
+        alert('Error fetching transaction data.');
     }
-  } else {
-    document.getElementById('transaction-details').innerHTML = '<p>No transaction hash provided.</p>';
-  }
 }
 
-// Initialize transaction details
-if (document.getElementById('transaction-details')) {
-  fetchTransactionDetails();
-}
-
-async function fetchAndDisplayTransactionReceipt(txIdElement, receiptDiv) {
+async function fetchTransactionById(txId) {
   try {
-    document.getElementById('receipt-btn').style.display = "none";
-    var txId = txIdElement.textContent.replace("Block Number: ", "");
+    var transactionDetailsContainer = document.getElementById('transaction-details');
     const receiptData = await sendRPCRequest('eth_getTransactionReceipt', [txId]);
 
     if (receiptData) {
       // Append receipt fields to the provided div
-      receiptDiv.innerHTML = `
-        <h3>Transaction Receipt</h3>
+      transactionDetailsContainer.innerHTML = `
+        <h3>Transaction #${parseInt(receiptData.blockNumber, 16)}</h3>
+        <p>From: ${receiptData.from}</p>
+        <p>To: ${receiptData.to}</p>
+        <p>Amount: ${parseInt(receiptData.amount, 16)/(10**18)} XYL (${parseInt(receiptData.amount, 16)} wxei)</p>
         <p>Block Hash: ${receiptData.blockHash}</p>
         <p>Block Number: ${parseInt(receiptData.blockNumber, 16)}</p>
+        <p>Transaction Hash: ${receiptData.transactionHash}</p>
+        <p>Transaction Index: ${parseInt(receiptData.transactionIndex, 16)}</p>
         <p>Contract Address: ${receiptData.contractAddress || 'N/A'}</p>
         <p>Cumulative Gas Used: ${parseInt(receiptData.cumulativeGasUsed, 16)}</p>
         <p>Effective Gas Price: ${parseInt(receiptData.effectiveGasPrice, 16)}</p>
-        <p>From: ${receiptData.from}</p>
         <p>Gas Used: ${parseInt(receiptData.gasUsed, 16)}</p>
         <p>Status: ${parseInt(receiptData.status, 16) === 1 ? 'Success' : 'Failed'}</p>
-        <p>To: ${receiptData.to}</p>
-        <p>Transaction Hash: ${receiptData.transactionHash}</p>
-        <p>Transaction Index: ${parseInt(receiptData.transactionIndex, 16)}</p>
         <p>Type: ${receiptData.type}</p>
-        
         <h4>Raw JSON</h4>
         <pre><code class="json">${JSON.stringify(receiptData, null, 2)}</code></pre>
       `;
@@ -265,3 +235,22 @@ async function fetchAndDisplayTransactionReceipt(txIdElement, receiptDiv) {
   }
 }
 
+async function fetchTransaction() {
+  // Determine what to fetch based on URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const blockId = urlParams.get('id'); // Get block ID from URL
+  const txHash = urlParams.get('hash'); // Get transaction hash from URL
+  
+  if (blockId) {
+    fetchTransactionById(blockId); // Fetch transaction by block ID
+  } else if (txHash) {
+    fetchTransactionByHash(txHash); // Fetch transaction by hash
+  } else {
+    console.error('No valid parameters provided.');
+    alert('No valid parameters provided. Please include "id" or "hash" in the URL.');
+  }
+}
+
+if (document.getElementById('transaction-details')) {
+  fetchTransaction();
+}
