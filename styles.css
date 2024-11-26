@@ -137,3 +137,39 @@ body {
   scrollbar-width: none;
 }
 
+
+.transactions table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensures compact columns */
+  background-color: #2c2c2c;
+  color: #fff;
+}
+
+.transactions th,
+.transactions td {
+  padding: 5px; /* Reduced padding for compactness */
+  text-align: left;
+  border: 1px solid #444;
+  font-size: 12px; /* Smaller font size */
+  word-wrap: break-word; /* Handles long strings */
+  overflow: hidden;
+}
+
+.transactions th {
+  background-color: #444;
+  font-weight: bold;
+}
+
+.transactions tr:nth-child(even) {
+  background-color: #333;
+}
+
+.transactions a {
+  color: #1e90ff;
+  text-decoration: none;
+}
+
+.transactions a:hover {
+  text-decoration: underline;
+}

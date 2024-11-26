@@ -44,7 +44,7 @@ async function fetchLatestBlocks() {
     const blockElement = document.createElement('div');
     blockElement.classList.add('block');
     blockElement.innerHTML = `
-      <p><a href="block_details.html?block=${blockData.hash}">Block Hash: ${blockData.hash}</a></p>
+      <p><a href="block_details.html?hash=${blockData.hash}">Block Hash: ${blockData.hash}</a></p>
       <p>${blNum}</p>
       <p>Transactions: ${blockData.transactions.length}</p>
       <p>Timestamp: ${blockData.timestamp}</p>
@@ -56,10 +56,25 @@ async function fetchLatestBlocks() {
 // Fetch and display block details
 async function fetchBlockDetails() {
   const urlParams = new URLSearchParams(window.location.search);
-  const blockHash = urlParams.get('block');
-
+  const blockId = urlParams.get('id');
+  const blockHash = urlParams.get('hash');
   if (blockHash) {
     const blockData = await sendRPCRequest('eth_getBlockByHash', [blockHash, true]);
+    var blNum = blockData.index;
+    if (blNum == "0") { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
+    const blockDetailsContainer = document.getElementById('block-details');
+    blockDetailsContainer.innerHTML = `
+      <p>Block Hash: ${blockData.hash}</p>
+      <p>${blNum}</p>
+      <p>Timestamp: ${new Date(blockData.timestamp * 1000).toLocaleString()}</p>
+      <p>Transactions: ${blockData.transactions.length}</p>
+      <!-- <p>Miner: ${blockData.miner}</p> -->
+    `;
+
+    const rawJsonContainer = document.getElementsByTagName("code")[0];
+    rawJsonContainer.textContent = JSON.stringify(blockData, null, 2);
+  } else if (blockId) {
+    const blockData = await sendRPCRequest('eth_getBlockByNumber', [blockId, true]);
     var blNum = blockData.index;
     if (blNum == "0") { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
     const blockDetailsContainer = document.getElementById('block-details');
@@ -209,7 +224,7 @@ async function fetchTransactionById(txId) {
         <h3>Transaction #${parseInt(receiptData.blockNumber, 16)}</h3>
         <p>From: ${receiptData.from}</p>
         <p>To: ${receiptData.to}</p>
-        <p>Amount: ${parseInt(receiptData.amount, 16)/(10**18)} XYL (${parseInt(receiptData.amount, 16)} wxei)</p>
+        <p>Amount: ${parseInt(receiptData.amount, 16)/(10**18)} XYL</p>
         <p>Block Hash: ${receiptData.blockHash}</p>
         <p>Block Number: ${parseInt(receiptData.blockNumber, 16)}</p>
         <p>Transaction Hash: ${receiptData.transactionHash}</p>
@@ -253,4 +268,66 @@ async function fetchTransaction() {
 
 if (document.getElementById('transaction-details')) {
   fetchTransaction();
+}
+
+
+// Fetch recent transactions for a specific address and directly render them in the table
+async function getRecentTransactionsByUser(address, maxBlocks = 100) {
+  const latestBlockNumber = await sendRPCRequest('eth_blockNumber'); // Get the latest block number (in decimal)
+  const transactionsTable = document.querySelector('.transactions table');
+  const transactionsTBody = transactionsTable.querySelector('tbody');
+
+
+  // Iterate over the blocks and fetch transactions
+  for (let i = 0; i < maxBlocks; i++) {
+    const blockNumber = latestBlockNumber - i; // Block number to query
+    if (blockNumber < 0) break; // Stop if we go below block 0
+
+    // Fetch block data with transactions
+    const blockData = await sendRPCRequest('eth_getBlockByNumber', [blockNumber.toString(16), true]);
+
+    // Filter and render transactions involving the address
+    for (let tx of blockData.transactions) {
+      if (tx.sender.toLowerCase() === address.toLowerCase() || tx.recipient.toLowerCase() === address.toLowerCase()) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><a href="block_details.html?id=${blockNumber}">${blockNumber}</a></td>
+          <td><a href="tx.html?hash=${tx.hash}">${tx.hash}</a></td>
+          <td>${tx.sender}</td>
+          <td>${tx.recipient}</td>
+          <td>${parseInt(tx.amount, 10) / (10**18)} XYL</td>
+          <td>${new Date(blockData.timestamp * 1000).toLocaleString()}</td>
+        `;
+        transactionsTBody.appendChild(row);
+      }
+    }
+  }
+}
+
+// Fetch and render address info (balance and recent transactions)
+async function fetchAddressInfo() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const address = urlParams.get('address'); // Get the address from the URL
+
+  try {
+    // Fetch and render balance
+    const balance = await sendRPCRequest('eth_getBalance', [address]);
+    document.querySelector('.address-info').innerHTML = `
+      <h2>Address: ${address}</h2>
+      <p><strong>Balance:</strong> ${parseInt(balance, 16) / 10 ** 18} XYL</p>
+    `;
+
+    // Fetch and render recent transactions directly in the table
+    await getRecentTransactionsByUser(address);
+
+  } catch (error) {
+    console.error('Error fetching address info:', error);
+    document.body.innerHTML = '<p>Error fetching address info.</p>';
+  }
+}
+
+
+
+if (document.getElementById('address-info')) {
+  fetchAddressInfo();
 }

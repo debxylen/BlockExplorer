@@ -7,22 +7,30 @@
 </head>
 <body>
 <script>
-  // Get the current URL path
-  const path = window.location.pathname;
+// Get the current path
+const path = window.location.pathname;
 
-  // Adjust the base path to match your GitHub Pages repository name
-  const basePath = '/BlockExplorer';
+// Handle `/tx/{hash}` redirect
+const txMatch = path.match(new RegExp(`^/BlockExplorer/tx/([^/]+)$`));
+if (txMatch) {
+  const hash = txMatch[1];
+  window.location.href = `/BlockExplorer/tx.html?id=${hash}`;
+}
+// Handle `/block/{blockNumber}` redirect
+else if (path.match(new RegExp(`^/BlockExplorer/block/([^/]+)$`))) {
+  const blockNumber = path.split('/').pop();
+  window.location.href = `/BlockExplorer/block_details.html?id=${blockNumber}`;
+}
+// Handle `/address/{address}` redirect
+else if (path.match(new RegExp(`^/BlockExplorer/address/([^/]+)$`))) {
+  const address = path.split('/').pop();
+  window.location.href = `/BlockExplorer/address.html?address=${address}`;
+}
+// If no match, show 404 message or redirect to home
+else {
+  document.body.innerHTML = '<h1>404 - Page Not Found</h1>';
+}
 
-  // Check if the path matches `/BlockExplorer/tx/{hash}`
-  const match = path.match(new RegExp(`^${basePath}/tx/([^/]+)$`));
-  if (match) {
-    // Extract the hash and redirect to `/tx?id={hash}`
-    const hash = match[1];
-    window.location.href = `${basePath}/tx?id=${hash}`;
-  } else {
-    // If no match, show a 404 message or redirect to home
-    document.body.innerHTML = '<h1>404 - Page Not Found</h1>';
-  }
 </script>
 
 </body>
