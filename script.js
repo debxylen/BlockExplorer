@@ -100,6 +100,10 @@ async function search() {
   const query = document.getElementById('search-input').value.trim(); // Get and trim input
 
   if (query) {
+    if (query.startsWith("0x")) {
+      window.location.href = `address.html?address=${query}`;
+      return;
+    }
     // It's a valid hash format; check if it's a block or a transaction
     const blockData = await sendRPCRequest('eth_getBlockByHash', [query]);
     if (blockData) {
