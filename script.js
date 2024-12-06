@@ -8,7 +8,7 @@ async function sendRPCRequest(method, params) {
     method: method,
     id: Math.floor(Math.random() * 1000), // Unique ID for each request
   };
-
+  // // console.log(params);
   // Add params only if they are provided
   if (params !== undefined) {
     payload.params = params;
@@ -23,13 +23,14 @@ async function sendRPCRequest(method, params) {
   });
 
   const data = await response.json();
+  // // console.log(data.result);
   return data.result; // Extract result from the response
 }
 
 // Fetch and display latest blocks
 async function fetchLatestBlocks() {
-  const latestBlockNumber = await sendRPCRequest('eth_blockNumber'); // Block number in decimal
-
+  var latestBlockNumber = await sendRPCRequest('eth_blockNumber'); 
+  latestBlockNumber = parseInt(latestBlockNumber, 16); //decimal
   const blocksContainer = document.getElementById('latest-blocks');
   blocksContainer.innerHTML = '';
 
@@ -74,7 +75,7 @@ async function fetchBlockDetails() {
     const rawJsonContainer = document.getElementsByTagName("code")[0];
     rawJsonContainer.textContent = JSON.stringify(blockData, null, 2);
   } else if (blockId) {
-    const blockData = await sendRPCRequest('eth_getBlockByNumber', [blockId, true]);
+    const blockData = await sendRPCRequest('eth_getBlockByNumber', [ Number(blockId).toString(16)]); // convert blockid to hex
     var blNum = blockData.index;
     if (blNum == "0") { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
     const blockDetailsContainer = document.getElementById('block-details');
@@ -277,7 +278,8 @@ if (document.getElementById('transaction-details')) {
 
 // Fetch recent transactions for a specific address and directly render them in the table
 async function getRecentTransactionsByUser(address, maxBlocks = 100) {
-  const latestBlockNumber = await sendRPCRequest('eth_blockNumber'); // Get the latest block number (in decimal)
+  var latestBlockNumber = await sendRPCRequest('eth_blockNumber'); // Get the latest block number 
+  latestBlockNumber = parseInt(latestBlockNumber, 16); //decimal 
   const transactionsTable = document.querySelector('.transactions table');
   const transactionsTBody = transactionsTable.querySelector('tbody');
 
