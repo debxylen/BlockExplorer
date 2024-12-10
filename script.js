@@ -92,11 +92,6 @@ async function fetchBlockDetails() {
   }
 }
 
-// Search functionality
-function search() {
-  const query = document.getElementById('search-input').value;
-  window.location.href = `block_details.html?block=${query}`;
-}
 async function search() {
   const query = document.getElementById('search-input').value.trim(); // Get and trim input
 
@@ -116,7 +111,7 @@ async function search() {
     const transactionData = await sendRPCRequest('eth_getTransactionByHash', [query]);
     if (transactionData) {
       // If it's found as a transaction, redirect to transaction details
-      window.location.href = `tx_details.html?tx=${query}`;
+      window.location.href = `tx.html?hash=${query}`;
       return;
     }
 
