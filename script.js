@@ -171,7 +171,7 @@ async function fetchLatestTransactions() {
       transactionElement.classList.add('transaction');
 
       transactionElement.innerHTML = `
-        <p>Transaction Hash: <a href="tx.html?tx=${tx.hash}">${tx.hash}</a></p>
+        <p>Transaction Hash: <a href="tx.html?hash=${tx.hash}">${tx.hash}</a></p>
         <p>From: ${tx.from}</p>
         <p>To: ${tx.to}</p>
         <p>Value: ${Number(tx.value) / 10**18} ETH</p>
@@ -249,6 +249,7 @@ if (document.getElementById('receipt-div')) {
 
 // Fetch recent transactions for a specific address and directly render them in the table
 async function getRecentTransactionsByUser(address, maxBlocks = 100) {
+  var address = address || "";
   var latestBlockNumber = await sendRPCRequest('eth_blockNumber'); // Get the latest block number 
   latestBlockNumber = parseInt(latestBlockNumber, 16); //decimal 
   const transactionsTable = document.querySelector('.transactions table');
@@ -265,13 +266,13 @@ async function getRecentTransactionsByUser(address, maxBlocks = 100) {
 
     // Filter and render transactions involving the address
     for (let tx of blockData.transactions) {
-      if (tx.sender.toLowerCase() === address.toLowerCase() || tx.recipient.toLowerCase() === address.toLowerCase()) {
+      if ((tx.from || "").toLowerCase() === address.toLowerCase() || (tx.to || "").toLowerCase() === address.toLowerCase()) {
         const row = document.createElement('tr');
         row.innerHTML = `
           <td><a href="block_details.html?id=${blockNumber}">${blockNumber}</a></td>
           <td><a href="tx.html?hash=${tx.hash}">${tx.hash}</a></td>
-          <td>${tx.sender}</td>
-          <td>${tx.recipient}</td>
+          <td>${tx.from}</td>
+          <td>${tx.to}</td>
           <td>${Number(tx.value) / (10**18)} ETH</td>
           <td>${new Date(blockData.timestamp * 1000).toLocaleString()}</td>
         `;
@@ -288,7 +289,7 @@ async function fetchAddressInfo() {
 
   try {
     // Fetch and render balance
-    const balance = await sendRPCRequest('eth_getBalance', [address]);
+    const balance = await sendRPCRequest('eth_getBalance', [address, 'latest']);
     document.querySelector('.address-info').innerHTML = `
       <h2>Address: ${address}</h2>
       <p><strong>Balance:</strong> ${parseInt(balance, 16) / 10 ** 18} ETH</p>
@@ -299,7 +300,7 @@ async function fetchAddressInfo() {
 
   } catch (error) {
     console.error('Error fetching address info:', error);
-    document.body.innerHTML = '<p>Error fetching address info.</p>';
+    alert('Error fetching address info.');
   }
 }
 
