@@ -1,7 +1,8 @@
-# XYL Block Explorer
+# ETH Block Explorer
 
-This is a static, client-side Block Explorer designed for the [XYL Testnet](https://github.com/debxylen/XYL-Testnet). It provides a dark-themed and well-looking interface to view details like balance of an address, recent transactions, block details...etc. 
-It is also configurable to work with any Ethereum Virtual Machine (EVM) compatible blockchain.
+This is a static, client-side Block Explorer originally designed for the now-archived XYL TestNet. 
+It provides a dark-themed and ~~well-looking~~ kinda shit-looking interface to view details like balance of an address, recent transactions, block details...etc. 
+It is also configurable to work with any Ethereum Virtual Machine (EVM) compatible blockchain. [MAYBE]
 
 ## Features
 
@@ -9,11 +10,6 @@ It is also configurable to work with any Ethereum Virtual Machine (EVM) compatib
 - Browse recent transactions and transaction details
 - Navigate through block details
 - Easily adaptable to any EVM chain
-
-## Demo
-
-You can view the live Block Explorer for the XYL Testnet here:
-[XYL Block Explorer](https://debxylen.github.io/BlockExplorer/)
 
 ## Setup Instructions
 

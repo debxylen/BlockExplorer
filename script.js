@@ -174,7 +174,7 @@ async function fetchLatestTransactions() {
         <p>Transaction Hash: <a href="tx.html?tx=${tx.hash}">${tx.hash}</a></p>
         <p>From: ${tx.from}</p>
         <p>To: ${tx.to}</p>
-        <p>Value: ${Number(tx.value) / 10**18} XYL</p>
+        <p>Value: ${Number(tx.value) / 10**18} ETH</p>
       `;
       transactionsList.appendChild(transactionElement);
     }
@@ -204,7 +204,7 @@ async function fetchTransactionByHash(txId) {
         <h3>Transaction #${parseInt(receiptData.blockNumber, 16)}</h3>
         <p>From: ${receiptData.from}</p>
         <p>To: ${receiptData.to}</p>
-        <p>Amount: ${Number(receiptData.value)/(10**18)} XYL</p>
+        <p>Amount: ${Number(receiptData.value)/(10**18)} ETH</p>
         <p>Block Hash: ${receiptData.blockHash}</p>
         <p>Block Number: ${parseInt(receiptData.blockNumber, 16)}</p>
         <p>Transaction Hash: ${receiptData.transactionHash}</p>
@@ -272,7 +272,7 @@ async function getRecentTransactionsByUser(address, maxBlocks = 100) {
           <td><a href="tx.html?hash=${tx.hash}">${tx.hash}</a></td>
           <td>${tx.sender}</td>
           <td>${tx.recipient}</td>
-          <td>${Number(tx.value) / (10**18)} XYL</td>
+          <td>${Number(tx.value) / (10**18)} ETH</td>
           <td>${new Date(blockData.timestamp * 1000).toLocaleString()}</td>
         `;
         transactionsTBody.appendChild(row);
@@ -291,7 +291,7 @@ async function fetchAddressInfo() {
     const balance = await sendRPCRequest('eth_getBalance', [address]);
     document.querySelector('.address-info').innerHTML = `
       <h2>Address: ${address}</h2>
-      <p><strong>Balance:</strong> ${parseInt(balance, 16) / 10 ** 18} XYL</p>
+      <p><strong>Balance:</strong> ${parseInt(balance, 16) / 10 ** 18} ETH</p>
     `;
 
     // Fetch and render recent transactions directly in the table
