@@ -1,4 +1,4 @@
-const RPC_URL = 'https://xyl-testnet.glitch.me/rpc/'; // Replace with your RPC URL
+const RPC_URL = 'https://ethereum-rpc.publicnode.com';
 
 // Send RPC Request
 async function sendRPCRequest(method, params) {
@@ -39,9 +39,9 @@ async function fetchLatestBlocks() {
     if (blockNumber < 0) {
       break;
     }
-    const blockData = await sendRPCRequest('eth_getBlockByNumber', [blockNumber.toString(16)]);
-    var blNum = blockData.index;
-    if (blNum == "0") { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
+    const blockData = await sendRPCRequest('eth_getBlockByNumber', ["0x" + blockNumber.toString(16), false]);
+    var blNum = Number(blockData.number);
+    if (blNum == 0) { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
     const blockElement = document.createElement('div');
     blockElement.classList.add('block');
     blockElement.innerHTML = `
@@ -60,31 +60,31 @@ async function fetchBlockDetails() {
   const blockId = urlParams.get('id');
   const blockHash = urlParams.get('hash');
   if (blockHash) {
-    const blockData = await sendRPCRequest('eth_getBlockByHash', [blockHash, true]);
-    var blNum = blockData.index;
-    if (blNum == "0") { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
+    const blockData = await sendRPCRequest('eth_getBlockByHash', [blockHash, false]);
+    var blNum = Number(blockData.number);
+    if (blNum == 0) { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
     const blockDetailsContainer = document.getElementById('block-details');
     blockDetailsContainer.innerHTML = `
       <p>Block Hash: ${blockData.hash}</p>
       <p>${blNum}</p>
       <p>Timestamp: ${new Date(blockData.timestamp * 1000).toLocaleString()}</p>
       <p>Transactions: ${blockData.transactions.length}</p>
-      <!-- <p>Miner: ${blockData.miner}</p> -->
+      <p>Miner: ${blockData.miner}</p>
     `;
 
     const rawJsonContainer = document.getElementsByTagName("code")[0];
     rawJsonContainer.textContent = JSON.stringify(blockData, null, 2);
   } else if (blockId) {
-    const blockData = await sendRPCRequest('eth_getBlockByNumber', [ Number(blockId).toString(16)]); // convert blockid to hex
-    var blNum = blockData.index;
-    if (blNum == "0") { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
+    const blockData = await sendRPCRequest('eth_getBlockByNumber', [ "0x" + Number(blockId).toString(16), false]); // convert blockid to hex
+    var blNum = Number(blockData.number);
+    if (blNum == 0) { blNum = "Genesis Block"; } else { blNum = "Block Number: " + blNum;}
     const blockDetailsContainer = document.getElementById('block-details');
     blockDetailsContainer.innerHTML = `
       <p>Block Hash: ${blockData.hash}</p>
       <p>${blNum}</p>
       <p>Timestamp: ${new Date(blockData.timestamp * 1000).toLocaleString()}</p>
       <p>Transactions: ${blockData.transactions.length}</p>
-      <!-- <p>Miner: ${blockData.miner}</p> -->
+      <p>Miner: ${blockData.miner}</p>
     `;
 
     const rawJsonContainer = document.getElementsByTagName("code")[0];
@@ -147,15 +147,15 @@ async function fetchLatestTransactions() {
     if (blockNumber < 0) {
       break;
     }
-    const blockData = await sendRPCRequest('eth_getBlockByNumber', [blockNumber.toString(16), true]); // Include transactions in the block
+    const blockData = await sendRPCRequest('eth_getBlockByNumber', ["0x" + blockNumber.toString(16), true]); // Include transactions in the block
 
     // Create a container for each block
     const blockElement = document.createElement('div');
     blockElement.classList.add('tx-block-container');
 
     // Add block information
-    var blockNum = blockData.index;
-    if (blockNum == "0") { blockNum = "Genesis Block"; } else { blockNum = "Block Number: "+blockNum}
+    var blockNum = Number(blockData.number);
+    if (blockNum == 0) { blockNum = "Genesis Block"; } else { blockNum = "Block Number: "+blockNum}
     blockElement.innerHTML = `
       <h4>${blockNum}</h4>
       <p>Block Hash: <a href="block_details.html?block=${blockData.hash}">${blockData.hash}</a></p>
@@ -171,10 +171,10 @@ async function fetchLatestTransactions() {
       transactionElement.classList.add('transaction');
 
       transactionElement.innerHTML = `
-        <p>Transaction Hash: <a href="transaction_details.html?tx=${tx.hash}">${tx.hash}</a></p>
-        <p>From: ${tx.sender}</p>
-        <p>To: ${tx.recipient}</p>
-        <p>Value: ${parseInt(tx.amount, 16)} XYL</p>
+        <p>Transaction Hash: <a href="tx.html?tx=${tx.hash}">${tx.hash}</a></p>
+        <p>From: ${tx.from}</p>
+        <p>To: ${tx.to}</p>
+        <p>Value: ${Number(tx.value) / 10**18} XYL</p>
       `;
       transactionsList.appendChild(transactionElement);
     }
@@ -193,27 +193,7 @@ if (document.getElementById('latest-transactions')) {
   fetchLatestTransactions();
 }
 
-// Fetch transaction details by hash and redirect
-async function fetchTransactionByHash(txHash) {
-    try {
-        // Send RPC request to get transaction details
-        const transactionData = await sendRPCRequest('eth_getTransactionByHash', [txHash]);
-
-        if (transactionData) {
-            // Redirect to the transaction's block number page
-            const blockNumber = transactionData.blockNumber; // Convert hex to decimal
-            window.location.href = `tx.html?id=${blockNumber}`;
-        } else {
-            console.error('Transaction not found.');
-            alert('Transaction not found.');
-        }
-    } catch (error) {
-        console.error('Error fetching transaction:', error);
-        alert('Error fetching transaction data.');
-    }
-}
-
-async function fetchTransactionById(txId) {
+async function fetchTransactionByHash(txId) {
   try {
     var transactionDetailsContainer = document.getElementById('transaction-details');
     const receiptData = await sendRPCRequest('eth_getTransactionReceipt', [txId]);
@@ -224,15 +204,15 @@ async function fetchTransactionById(txId) {
         <h3>Transaction #${parseInt(receiptData.blockNumber, 16)}</h3>
         <p>From: ${receiptData.from}</p>
         <p>To: ${receiptData.to}</p>
-        <p>Amount: ${parseInt(receiptData.amount, 16)/(10**18)} XYL</p>
+        <p>Amount: ${Number(receiptData.value)/(10**18)} XYL</p>
         <p>Block Hash: ${receiptData.blockHash}</p>
         <p>Block Number: ${parseInt(receiptData.blockNumber, 16)}</p>
         <p>Transaction Hash: ${receiptData.transactionHash}</p>
         <p>Transaction Index: ${parseInt(receiptData.transactionIndex, 16)}</p>
         <p>Contract Address: ${receiptData.contractAddress || 'N/A'}</p>
-        <p>Cumulative Gas Used: ${parseInt(receiptData.cumulativeGasUsed, 16)}</p>
-        <p>Effective Gas Price: ${parseInt(receiptData.effectiveGasPrice, 16)}</p>
-        <p>Gas Used: ${parseInt(receiptData.gasUsed, 16)}</p>
+        <p>Cumulative Gas Used: ${Number(receiptData.cumulativeGasUsed)} wei</p>
+        <p>Effective Gas Price: ${Number(receiptData.effectiveGasPrice)} wei</p>
+        <p>Gas Used: ${Number(receiptData.gasUsed)} wei</p>
         <p>Status: ${parseInt(receiptData.status, 16) === 1 ? 'Success' : 'Failed'}</p>
         <p>Type: ${receiptData.type}</p>
         <h4>Raw JSON</h4>
@@ -251,22 +231,18 @@ async function fetchTransactionById(txId) {
 }
 
 async function fetchTransaction() {
-  // Determine what to fetch based on URL parameters
   const urlParams = new URLSearchParams(window.location.search);
-  const blockId = urlParams.get('id'); // Get block ID from URL
-  const txHash = urlParams.get('hash'); // Get transaction hash from URL
+  const txHash = urlParams.get('hash');
   
-  if (blockId) {
-    fetchTransactionById(blockId); // Fetch transaction by block ID
-  } else if (txHash) {
+  if (txHash) {
     fetchTransactionByHash(txHash); // Fetch transaction by hash
   } else {
     console.error('No valid parameters provided.');
-    alert('No valid parameters provided. Please include "id" or "hash" in the URL.');
+    alert('No valid parameters provided. Please include the transaction\'s hash in the URL.');
   }
 }
 
-if (document.getElementById('transaction-details')) {
+if (document.getElementById('receipt-div')) {
   fetchTransaction();
 }
 
@@ -285,7 +261,7 @@ async function getRecentTransactionsByUser(address, maxBlocks = 100) {
     if (blockNumber < 0) break; // Stop if we go below block 0
 
     // Fetch block data with transactions
-    const blockData = await sendRPCRequest('eth_getBlockByNumber', [blockNumber.toString(16), true]);
+    const blockData = await sendRPCRequest('eth_getBlockByNumber', ["0x" + blockNumber.toString(16), true]);
 
     // Filter and render transactions involving the address
     for (let tx of blockData.transactions) {
@@ -296,7 +272,7 @@ async function getRecentTransactionsByUser(address, maxBlocks = 100) {
           <td><a href="tx.html?hash=${tx.hash}">${tx.hash}</a></td>
           <td>${tx.sender}</td>
           <td>${tx.recipient}</td>
-          <td>${parseInt(tx.amount, 10) / (10**18)} XYL</td>
+          <td>${Number(tx.value) / (10**18)} XYL</td>
           <td>${new Date(blockData.timestamp * 1000).toLocaleString()}</td>
         `;
         transactionsTBody.appendChild(row);
